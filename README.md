@@ -114,10 +114,10 @@ Medical-Chatbot/
 │
 ├── app.py                   # Main Flask application & RAG chain setup
 ├── store_index.py           # One-time script: ingests PDFs → Pinecone
-├── summary.py               # High-level pipeline summary/documentation
-├── setup.py                 # Package setup (Ramy Ahmed)
+├── summary.py               # summary/documentation for this project
+├── setup.py                 # Package setup
 ├── requirements.txt         # Python dependencies
-├── .env                     # API keys (never commit this!)
+├── .env                     # API keys
 │
 ├── src/
 │   ├── __init__.py
@@ -125,7 +125,7 @@ Medical-Chatbot/
 │   └── prompt.py            # System prompt for the LLM
 │
 ├── templates/
-│   └── chat.html            # Chat UI frontend
+│   └── chat.html            # Chat UI HTML
 │
 ├── static/
 │   └── style.css            # Custom CSS styling
