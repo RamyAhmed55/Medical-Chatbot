@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Assistant</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Link to external CSS file using Flask url_for -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-icon">
+                <i class="fas fa-stethoscope"></i>
+            </div>
+            <div class="header-text">
+                <h2>Dr. AI Assistant</h2>
+                <p>Always here to help</p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-body" id="chat-body">
+            <!-- Initial Greeting -->
+            <div class="message bot-message">
+                <div class="msg-bubble">
+                    Hello! I am your virtual medical assistant. Please describe your symptoms or ask me a health-related question.
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-footer">
+            <form id="chat-form">
+                <input type="text" id="msg-input" name="msg" placeholder="Type your message..." required autocomplete="off">
+                <button type="submit" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle logic with Flask -->
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const msgInput = document.getElementById('msg-input');
+        const chatBody = document.getElementById('chat-body');
+
+        function scrollToBottom() {
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function appendMessage(text, senderClass) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', senderClass);
+            
+            const formattedText = text.replace(/\n/g, '<br>');
+            
+            msgDiv.innerHTML = `<div class="msg-bubble">${formattedText}</div>`;
+            chatBody.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        function appendTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', 'bot-message');
+            msgDiv.id = id;
+            msgDiv.innerHTML = `
+                <div class="msg-bubble">
+                    <div class="typing-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            chatBody.appendChild(msgDiv);
+            scrollToBottom();
+            return id;
+        }
+
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userText = msgInput.value.trim();
+            if (!userText) return;
+
+            appendMessage(userText, 'user-message');
+            msgInput.value = '';
+
+            const typingId = appendTypingIndicator();
+
+            try {
+                const response = await fetch('/get', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'msg': userText
+                    })
+                });
+
+                const botResponseText = await response.text();
+
+                document.getElementById(typingId).remove();
+                appendMessage(botResponseText, 'bot-message');
+
+            } catch (error) {
+                console.error("Error connecting to server:", error);
+                document.getElementById(typingId).remove();
+                appendMessage("Sorry, I'm having trouble connecting to the server. Please try again.", 'bot-message');
+            }
+        });
+    </script>
+</body>
+</html>
